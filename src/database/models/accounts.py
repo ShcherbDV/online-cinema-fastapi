@@ -17,6 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.models.base import Base
+from src.security.passwords import hash_password, verify_password
 from src.security.utils import generate_secure_token
 
 
@@ -88,6 +89,17 @@ class UserModel(Base):
         return (
             f"<UserModel(id={self.id}, email={self.email}, is_active={self.is_active})>"
         )
+
+    @property
+    def password(self) -> None:
+        raise AttributeError("Password is write-only. Use the setter to set the password.")
+
+    @password.setter
+    def password(self, raw_password: str) -> None:
+        self._hashed_password = hash_password(raw_password)
+
+    def verify_password(self, raw_password: str) -> bool:
+        return verify_password(raw_password, self._hashed_password)
 
 
 class UserProfileModel:
@@ -165,7 +177,7 @@ class RefreshTokenModel(Base):
     expires_at: Mapped[[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc) + timedelta(days=1),
+        default=lambda: datetime.now(timezone.utc) + timedelta(days=5),
     )
     user: Mapped[UserModel] = relationship("User_model", back_populates="activate_token")
 
