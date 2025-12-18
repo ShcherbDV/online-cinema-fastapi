@@ -90,9 +90,23 @@ class UserModel(Base):
             f"<UserModel(id={self.id}, email={self.email}, is_active={self.is_active})>"
         )
 
+    @classmethod
+    def create(cls, email: str, raw_password: str, group_id: int | Mapped[int]) -> "UserModel":
+        """
+        Factory method to create a new UserModel instance.
+
+        This method simplifies the creation of a new user by handling
+        password hashing and setting required attributes.
+        """
+        user = cls(email=email, group_id=group_id)
+        user.password = raw_password
+        return user
+
     @property
     def password(self) -> None:
-        raise AttributeError("Password is write-only. Use the setter to set the password.")
+        raise AttributeError(
+            "Password is write-only. Use the setter to set the password."
+        )
 
     @password.setter
     def password(self, raw_password: str) -> None:
@@ -128,7 +142,9 @@ class ActivationTokenModel(Base):
     __tablename__ = "activation_tokens"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     token: Mapped[str] = mapped_column(
         String(64), unique=True, nullable=False, default=generate_secure_token
     )
@@ -137,7 +153,9 @@ class ActivationTokenModel(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc) + timedelta(days=1),
     )
-    user: Mapped[UserModel] = relationship("User_model", back_populates="activate_token")
+    user: Mapped[UserModel] = relationship(
+        "User_model", back_populates="activate_token"
+    )
 
     __table_args__ = (UniqueConstraint("user_id"),)
 
@@ -149,7 +167,9 @@ class PasswordResetTokenModel(Base):
     __tablename__ = "password_reset_tokens"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     token: Mapped[str] = mapped_column(
         String(64), unique=True, nullable=False, default=generate_secure_token
     )
@@ -158,7 +178,9 @@ class PasswordResetTokenModel(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc) + timedelta(days=1),
     )
-    user: Mapped[UserModel] = relationship("User_model", back_populates="activate_token")
+    user: Mapped[UserModel] = relationship(
+        "User_model", back_populates="activate_token"
+    )
 
     __table_args__ = (UniqueConstraint("user_id"),)
 
@@ -170,7 +192,9 @@ class RefreshTokenModel(Base):
     __tablename__ = "refresh_tokens"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     token: Mapped[str] = mapped_column(
         String(512), unique=True, nullable=False, default=generate_secure_token
     )
@@ -179,7 +203,9 @@ class RefreshTokenModel(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc) + timedelta(days=5),
     )
-    user: Mapped[UserModel] = relationship("User_model", back_populates="activate_token")
+    user: Mapped[UserModel] = relationship(
+        "User_model", back_populates="activate_token"
+    )
 
     __table_args__ = (UniqueConstraint("user_id"),)
 
