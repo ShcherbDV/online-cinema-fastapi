@@ -14,7 +14,7 @@ class BaseAppSettings(BaseSettings):
     PASSWORD_RESET_TEMPLATE_NAME: str = "password_reset_request.html"
     PASSWORD_RESET_COMPLETE_TEMPLATE_NAME: str = "password_reset_complete.html"
 
-    LOGIN_TIME_DAYS = 7
+    LOGIN_TIME_DAYS: int = 7
 
     EMAIL_HOST: str = os.getenv("EMAIL_HOST", "host")
     EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", 25))
@@ -34,6 +34,10 @@ class Settings(BaseAppSettings):
     SECRET_KEY_ACCESS: str = os.getenv("SECRET_KEY_ACCESS", os.urandom(32))
     SECRET_KEY_REFRESH: str = os.getenv("SECRET_KEY_REFRESH", os.urandom(32))
     JWT_SIGNING_ALGORITHM: str = os.getenv("JWT_SIGNING_ALGORITHM", "HS256")
+
+    class Config:
+        env_file = ".env",
+        extra = "ignore"
 
 
 class TestingSettings(BaseAppSettings):
