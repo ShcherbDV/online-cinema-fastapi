@@ -5,9 +5,7 @@ class BaseEmailPasswordSchema(BaseModel):
     email: EmailStr
     password: str
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class UserRegistrationRequestSchema(BaseEmailPasswordSchema):
@@ -18,6 +16,4 @@ class UserRegistrationResponseSchema(BaseModel):
     id: int
     email: EmailStr
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
