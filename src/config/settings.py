@@ -36,7 +36,7 @@ class Settings(BaseAppSettings):
     JWT_SIGNING_ALGORITHM: str = os.getenv("JWT_SIGNING_ALGORITHM", "HS256")
 
     class Config:
-        env_file = ".env",
+        env_file = (".env",)
         extra = "ignore"
 
 
