@@ -30,3 +30,13 @@ class MessageResponseSchema(BaseModel):
 
 class PasswordResetRequestSchema(BaseModel):
     email: EmailStr
+
+
+class UserLoginResponseSchema(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class UserLoginRequestSchema(BaseEmailPasswordSchema):
+    pass
