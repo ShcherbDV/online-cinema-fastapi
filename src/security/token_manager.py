@@ -3,7 +3,7 @@ from typing import Optional
 
 from jose import jwt, JWTError, ExpiredSignatureError
 
-from src.exceptions import TokenExpiredError, InvalidTokenError
+from src.exceptions.security import TokenExpiredError, InvalidTokenError
 from src.security.interfaces import JWTAuthManagerInterface
 
 
