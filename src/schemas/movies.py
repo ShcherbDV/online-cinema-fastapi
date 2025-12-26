@@ -57,7 +57,7 @@ class MovieBaseSchema(BaseModel):
     }
 
 
-class MovieDetailsSchema(MovieBaseSchema):
+class MovieDetailSchema(MovieBaseSchema):
     id: int
     certificate: CertificateSchema
     genres: List[GenreSchema]
