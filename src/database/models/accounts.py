@@ -212,7 +212,9 @@ class RefreshTokenModel(Base):
     __table_args__ = (UniqueConstraint("user_id"),)
 
     @classmethod
-    def create(cls, user_id: int | Mapped[int], days_valid: int, token: str) -> "RefreshTokenModel":
+    def create(
+        cls, user_id: int | Mapped[int], days_valid: int, token: str
+    ) -> "RefreshTokenModel":
         """
         Factory method to create a new RefreshTokenModel instance.
 
