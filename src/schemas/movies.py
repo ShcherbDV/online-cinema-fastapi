@@ -57,6 +57,18 @@ class MovieBaseSchema(BaseModel):
     }
 
 
+class MovieDetailsSchema(MovieBaseSchema):
+    id: int
+    certificate: CertificateSchema
+    genres: List[GenreSchema]
+    stars: List[StarSchema]
+    directors: List[DirectorSchema]
+
+    model_config = {
+        "from_attributes": True,
+    }
+
+
 class MovieListItemSchema(BaseModel):
     id: int
     name: str
