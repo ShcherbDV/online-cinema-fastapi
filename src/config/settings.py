@@ -1,7 +1,17 @@
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
 from pydantic_settings import BaseSettings
+
+
+
+CELERY_BEAT_SCHEDULE = {
+    "cleanup-expired-tokens-every-24-hours": {
+        "task": "src.tasks.cleanup_tokens.cleanup_expired_tokens",
+        "schedule": crontab(hour="*/24"),
+    }
+}
 
 
 class BaseAppSettings(BaseSettings):
