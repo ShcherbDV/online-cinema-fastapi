@@ -1,8 +1,60 @@
 from typing import List, Optional
-
-from pydantic import BaseModel
+from decimal import Decimal
+from pydantic import BaseModel, Field
 
 from src.schemas.examples.movies import movie_list_response_schema_example, movie_item_schema_example
+
+
+class GenreSchema(BaseModel):
+    id: int
+    name: str
+
+    model_config = {
+        "from_attributes": True,
+    }
+
+
+class StarSchema(BaseModel):
+    id: int
+    name: str
+
+    model_config = {
+        "from_attributes": True,
+    }
+
+
+class DirectorSchema(BaseModel):
+    id: int
+    name: str
+
+    model_config = {
+        "from_attributes": True,
+    }
+
+
+class CertificateSchema(BaseModel):
+    id: int
+    name: str
+
+    model_config = {
+        "from_attributes": True,
+    }
+
+
+class MovieBaseSchema(BaseModel):
+    name: str = Field(..., max_length=255)
+    year: int
+    time: int = Field(..., ge=0)
+    imdb: float
+    votes: int
+    meta_score: Optional[float]
+    gross: Optional[float]
+    description: str
+    price: Decimal
+
+    model_config = {
+        "from_attributes": True,
+    }
 
 
 class MovieListItemSchema(BaseModel):
