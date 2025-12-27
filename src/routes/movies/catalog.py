@@ -3,9 +3,10 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from src.database.models.movies import MovieModel
-from src.schemas.movies import MovieListResponseSchema, MovieListItemSchema, MovieDetailSchema
-from src.database import get_db
+from database.models.movies import MovieModel, GenreModel
+from schemas.movies import MovieListResponseSchema, MovieListItemSchema, MovieDetailSchema, GenreBaseSchema, \
+    GenreListResponseSchema, GenreListItemSchema
+from database import get_db
 
 router = APIRouter()
 
@@ -151,3 +152,69 @@ async def get_movie_by_id(
         )
 
     return MovieDetailSchema.model_validate(movie)
+
+@router.get(
+    "/genres/",
+    response_model=GenreListResponseSchema,
+    summary="Get a list of genres with movie counts",
+    description=(
+            "<h3>This endpoint retrieves list of genres from the database. "
+            "The response includes names of the genres and counts of movies.</h3>"
+    ),
+    responses={
+        404: {
+            "description": "No genres found.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No genres found."}
+                }
+            },
+        }
+    }
+)
+async def get_genre_list(
+        db: AsyncSession = Depends(get_db),
+) -> GenreListResponseSchema:
+    """
+    Fetch a list of genres from the database (asynchronously).
+
+    This function retrieves a list of genres.
+
+    :param db: The async SQLAlchemy database session (provided via dependency injection).
+    :type db: AsyncSession
+
+    :return: A response containing the list of genres and metadata.
+    :rtype: GenreBaseSchema
+
+    :raises HTTPException: Raises a 404 error if no genres are found for the requested page.
+    """
+
+    stmt = (
+        select(
+            GenreModel.id,
+            GenreModel.name,
+            func.count(MovieModel.id).label("movies_count"),
+        )
+        .outerjoin(MovieModel.genres)
+        .group_by(GenreModel.id)
+        .order_by(GenreModel.name)
+    )
+
+    result = await db.execute(stmt)
+    rows = result.all()
+
+    if not rows:
+        raise HTTPException(status_code=404, detail="No genres found.")
+
+    genres = [
+        GenreListItemSchema(
+            id=row.id,
+            name=row.name,
+            movies_count=row.movies_count,
+        )
+        for row in rows
+    ]
+
+    return  GenreListResponseSchema(genres=genres)
+
+
