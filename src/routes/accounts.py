@@ -7,27 +7,35 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from starlette import status
 
-from src.config.dependencies import get_accounts_email_notificator, get_settings, get_jwt_auth_manager
-from src.config.settings import BaseAppSettings
-from src.database.models.accounts import (
+from config.dependencies import (
+    get_accounts_email_notificator,
+    get_settings,
+    get_jwt_auth_manager,
+)
+from config.settings import BaseAppSettings
+from database.models.accounts import (
     UserModel,
     UserGroupModel,
     UserGroupEnum,
     ActivationTokenModel,
-    PasswordResetTokenModel, RefreshTokenModel,
+    PasswordResetTokenModel,
+    RefreshTokenModel,
 )
-from src.exceptions.security import BaseSecurityError
-from src.notifications.interfaces import EmailSenderInterface
-from src.schemas.accounts import (
+from exceptions.security import BaseSecurityError
+from notifications.interfaces import EmailSenderInterface
+from schemas.accounts import (
     UserRegistrationResponseSchema,
     UserRegistrationRequestSchema,
     MessageResponseSchema,
     UserActivationRequestSchema,
     PasswordResetRequestSchema,
-    UserLoginResponseSchema, UserLoginRequestSchema, TokenRefreshResponseSchema, TokenRefreshRequestSchema,
+    UserLoginResponseSchema,
+    UserLoginRequestSchema,
+    TokenRefreshResponseSchema,
+    TokenRefreshRequestSchema,
 )
-from src.database import get_db
-from src.security.interfaces import JWTAuthManagerInterface
+from database import get_db
+from security.interfaces import JWTAuthManagerInterface
 
 router = APIRouter()
 
@@ -390,6 +398,7 @@ async def login_user(
         refresh_token=jwt_refresh_token,
     )
 
+
 @router.post(
     "/refresh/",
     response_model=TokenRefreshResponseSchema,
@@ -400,39 +409,25 @@ async def login_user(
         400: {
             "description": "Bad Request - The provided refresh token is invalid or expired.",
             "content": {
-                "application/json": {
-                    "example": {
-                        "detail": "Token has expired."
-                    }
-                }
+                "application/json": {"example": {"detail": "Token has expired."}}
             },
         },
         401: {
             "description": "Unauthorized - Refresh token not found.",
             "content": {
-                "application/json": {
-                    "example": {
-                        "detail": "Refresh token not found."
-                    }
-                }
+                "application/json": {"example": {"detail": "Refresh token not found."}}
             },
         },
         404: {
             "description": "Not Found - The user associated with the token does not exist.",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": "User not found."
-                    }
-                }
-            },
+            "content": {"application/json": {"example": {"detail": "User not found."}}},
         },
     },
 )
 async def refresh_access_token(
-        token_data: TokenRefreshRequestSchema,
-        db: AsyncSession = Depends(get_db),
-        jwt_manager: JWTAuthManagerInterface = Depends(get_jwt_auth_manager),
+    token_data: TokenRefreshRequestSchema,
+    db: AsyncSession = Depends(get_db),
+    jwt_manager: JWTAuthManagerInterface = Depends(get_jwt_auth_manager),
 ) -> TokenRefreshResponseSchema:
     """
     Endpoint to refresh an access token.
