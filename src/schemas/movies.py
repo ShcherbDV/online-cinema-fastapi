@@ -1,13 +1,31 @@
 from typing import List, Optional
 from decimal import Decimal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
-from src.schemas.examples.movies import movie_list_response_schema_example, movie_item_schema_example
+from schemas.examples.movies import movie_list_response_schema_example, movie_item_schema_example
 
 
-class GenreSchema(BaseModel):
+class GenreBaseSchema(BaseModel):
     id: int
     name: str
+
+    model_config = {
+        "from_attributes": True,
+    }
+
+
+class GenreListItemSchema(BaseModel):
+    id: int
+    name: str
+    movies_count: int
+
+
+class GenreListResponseSchema(BaseModel):
+    genres: List[GenreListItemSchema]
+
+
+class GenreDetailSchema(GenreBaseSchema):
+    movies: List["MovieListItemSchema"]
 
     model_config = {
         "from_attributes": True,
@@ -60,7 +78,7 @@ class MovieBaseSchema(BaseModel):
 class MovieDetailSchema(MovieBaseSchema):
     id: int
     certificate: CertificateSchema
-    genres: List[GenreSchema]
+    genres: List[GenreBaseSchema]
     stars: List[StarSchema]
     directors: List[DirectorSchema]
 
@@ -101,3 +119,27 @@ class MovieListResponseSchema(BaseModel):
             ]
         }
     }
+
+class MovieCreateSchema(BaseModel):
+    name: str = Field(..., max_length=255)
+    year: int
+    time: int = Field(..., ge=0)
+    imdb: float
+    votes: int
+    meta_score: Optional[float]
+    gross: Optional[float]
+    description: str
+    price: Decimal
+    certificate: str
+    genres: List[str]
+    stars: List[str]
+    directors: List[str]
+
+    model_config = {
+        "from_attributes": True,
+    }
+
+    @field_validator("genres", "stars", "directors", mode="before")
+    @classmethod
+    def normalize_list_fields(cls, value: List[str]) -> List[str]:
+        return [item.title() for item in value]
