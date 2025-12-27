@@ -16,9 +16,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database.models.base import Base
-from src.security.passwords import hash_password, verify_password
-from src.security.utils import generate_secure_token
+from database.models.base import Base
+from security.passwords import hash_password, verify_password
+from security.utils import generate_secure_token
 
 
 class UserGroupEnum(str, enum.Enum):
@@ -39,7 +39,7 @@ class UserGroupModel(Base):
     name: Mapped[UserGroupEnum] = mapped_column(
         Enum(UserGroupEnum), nullable=False, unique=True
     )
-    users: Mapped[List["UserModel"]] = relationship("UserModel", back_populates="users")
+    users: Mapped[List["UserModel"]] = relationship("UserModel", back_populates="group")
 
     def __repr__(self):
         return f"<UserGroupModel(id={self.id}, name={self.name})>"
@@ -118,7 +118,9 @@ class UserModel(Base):
         return verify_password(raw_password, self._hashed_password)
 
 
-class UserProfileModel:
+class UserProfileModel(Base):
+    __tablename__ = "user_profiles"
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True
@@ -156,7 +158,7 @@ class ActivationTokenModel(Base):
         default=lambda: datetime.now(timezone.utc) + timedelta(days=1),
     )
     user: Mapped[UserModel] = relationship(
-        "User_model", back_populates="activate_token"
+        "UserModel", back_populates="activation_token"
     )
 
     __table_args__ = (UniqueConstraint("user_id"),)
@@ -181,7 +183,7 @@ class PasswordResetTokenModel(Base):
         default=lambda: datetime.now(timezone.utc) + timedelta(days=1),
     )
     user: Mapped[UserModel] = relationship(
-        "User_model", back_populates="activate_token"
+        "UserModel", back_populates="password_reset_token"
     )
 
     __table_args__ = (UniqueConstraint("user_id"),)
@@ -206,7 +208,7 @@ class RefreshTokenModel(Base):
         default=lambda: datetime.now(timezone.utc) + timedelta(days=5),
     )
     user: Mapped[UserModel] = relationship(
-        "User_model", back_populates="activate_token"
+        "UserModel", back_populates="refresh_token"
     )
 
     __table_args__ = (UniqueConstraint("user_id"),)
