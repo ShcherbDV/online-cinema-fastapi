@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
-from src.routes import accounts, movies
+from routes import accounts
+from routes.movies import catalog, moderator
 
 app = FastAPI(
     title="Online Cinema API",
@@ -10,4 +11,5 @@ app = FastAPI(
 api_version_prefix = "/api/v1"
 
 app.include_router(accounts.router, prefix=f"{api_version_prefix}/accounts", tags=["accounts"])
-app.include_router(movies.router, prefix=f"{api_version_prefix}/cinema", tags=["cinema"])
+app.include_router(catalog.router, prefix=f"{api_version_prefix}/cinema", tags=["cinema"])
+app.include_router(moderator.router, prefix=f"{api_version_prefix}/cinema", tags=["cinema"])
