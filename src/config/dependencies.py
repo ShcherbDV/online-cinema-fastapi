@@ -2,11 +2,11 @@ import os
 
 from fastapi import Depends
 
-from src.config.settings import BaseAppSettings, Settings, TestingSettings
-from src.notifications.emails import EmailSender
-from src.notifications.interfaces import EmailSenderInterface
-from src.security.interfaces import JWTAuthManagerInterface
-from src.security.token_manager import JWTAuthManager
+from config.settings import BaseAppSettings, Settings, TestingSettings
+from notifications.emails import EmailSender
+from notifications.interfaces import EmailSenderInterface
+from security.interfaces import JWTAuthManagerInterface
+from security.token_manager import JWTAuthManager
 
 
 def get_settings() -> BaseAppSettings:

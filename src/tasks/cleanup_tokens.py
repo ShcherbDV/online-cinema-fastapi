@@ -2,8 +2,8 @@ from datetime import datetime, timezone
 
 from celery import shared_task
 
-from src.database.models.accounts import ActivationTokenModel, PasswordResetTokenModel, RefreshTokenModel
-from src.database.session_sync import SessionLocal
+from database.models.accounts import ActivationTokenModel, PasswordResetTokenModel, RefreshTokenModel
+from database.session_sync import SessionLocal
 
 
 @shared_task(name="src.tasks.cleanup_tokens.cleanup_expired_tokens")

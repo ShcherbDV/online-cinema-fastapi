@@ -1,6 +1,6 @@
 from celery import Celery
 
-from src.config.dependencies import get_settings
+from config.dependencies import get_settings
 
 settings = get_settings()
 

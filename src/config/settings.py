@@ -2,9 +2,7 @@ import os
 from pathlib import Path
 
 from celery.schedules import crontab
-from pydantic_settings import BaseSettings
-
-
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 CELERY_BEAT_SCHEDULE = {
     "cleanup-expired-tokens-every-24-hours": {
@@ -35,20 +33,21 @@ class BaseAppSettings(BaseSettings):
 
 
 class Settings(BaseAppSettings):
-    POSTGRES_USER: str = os.getenv("POSTGRES_USER", "my_user")
-    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "my_password")
-    POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "my_host")
+    POSTGRES_USER: str = os.getenv("POSTGRES_USER", "admin")
+    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "postgres")
+    POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_DB_PORT: int = int(os.getenv("POSTGRES_DB_PORT", 5432))
-    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "cinema_db")
+    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "cinema")
 
     SECRET_KEY_ACCESS: str = os.getenv("SECRET_KEY_ACCESS", os.urandom(32))
     SECRET_KEY_REFRESH: str = os.getenv("SECRET_KEY_REFRESH", os.urandom(32))
     JWT_SIGNING_ALGORITHM: str = os.getenv("JWT_SIGNING_ALGORITHM", "HS256")
 
-    class Config:
-        env_file = (".env",)
+    model_config = SettingsConfigDict(
+        env_file = ".env",
+        env_file_encoding = "utf-8",
         extra = "ignore"
-
+    )
 
 class TestingSettings(BaseAppSettings):
     pass
