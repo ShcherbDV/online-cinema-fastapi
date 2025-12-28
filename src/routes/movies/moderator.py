@@ -10,6 +10,7 @@ from database import get_db
 
 router = APIRouter()
 
+
 @router.post(
     "/movies/",
     response_model=MovieDetailSchema,
@@ -145,6 +146,7 @@ async def create_movie(
         await db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
+
 @router.patch(
     "/movies/{movie_id}/",
     summary="Update a movie by ID",
@@ -216,3 +218,62 @@ async def update_movie(
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
     return {"detail": "Movie updated successfully."}
+
+
+@router.delete(
+    "/movies/{movie_id}/",
+    summary="Delete a movie by ID",
+    description=(
+            "<h3>Delete a specific movie from the database by its unique ID.</h3>"
+            "<p>If the movie exists, it will be deleted. If it does not exist, "
+            "a 404 error will be returned.</p>"
+    ),
+    responses={
+        204: {
+            "description": "Movie deleted successfully."
+        },
+        404: {
+            "description": "Movie not found.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Movie with the given ID was not found."}
+                }
+            },
+        },
+    },
+    status_code=204
+)
+async def delete_movie(
+        movie_id: int,
+        db: AsyncSession = Depends(get_db),
+):
+    """
+    Delete a specific movie by its ID.
+
+    This function deletes a movie identified by its unique ID.
+    If the movie does not exist, a 404 error is raised.
+
+    :param movie_id: The unique identifier of the movie to delete.
+    :type movie_id: int
+    :param db: The SQLAlchemy database session (provided via dependency injection).
+    :type db: AsyncSession
+
+    :raises HTTPException: Raises a 404 error if the movie with the given ID is not found.
+
+    :return: A response indicating the successful deletion of the movie.
+    :rtype: None
+    """
+    stmt = select(MovieModel).where(MovieModel.id == movie_id)
+    result = await db.execute(stmt)
+    movie = result.scalars().first()
+
+    if not movie:
+        raise HTTPException(
+            status_code=404,
+            detail="Movie with the given ID was not found."
+        )
+
+    await db.delete(movie)
+    await db.commit()
+
+    return {"detail": "Movie deleted successfully."}
