@@ -143,3 +143,19 @@ class MovieCreateSchema(BaseModel):
     @classmethod
     def normalize_list_fields(cls, value: List[str]) -> List[str]:
         return [item.title() for item in value]
+
+
+class MovieUpdateSchema(BaseModel):
+    name: str = Field(..., max_length=255)
+    year: int
+    time: int = Field(..., ge=0)
+    imdb: float
+    votes: int
+    meta_score: Optional[float]
+    gross: Optional[float]
+    description: str
+    price: Decimal
+
+    model_config = {
+        "from_attributes": True,
+    }
