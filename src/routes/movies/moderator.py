@@ -7,8 +7,9 @@ from database.models.movies import MovieModel, CertificationModel, GenreModel, S
 from schemas.movies import MovieDetailSchema, MovieCreateSchema, MovieUpdateSchema, GenreDetailSchema, GenreCreateSchema
 from database import get_db
 
+from config.dependencies import require_moderator
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_moderator)])
 
 
 @router.post(
