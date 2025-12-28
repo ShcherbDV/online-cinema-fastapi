@@ -161,6 +161,10 @@ class MovieModel(Base):
         "StarModel", secondary=MovieStarsModel, back_populates="movies"
     )
 
+    ratings: Mapped[list["MovieRatingModel"]] = relationship(
+        "MovieRatingModel", back_populates="movies", cascade="all, delete-orphan"
+    )
+
     __table_args__ = (
         UniqueConstraint("name", "year", "time", name="uniq_movie_year_time"),
     )
