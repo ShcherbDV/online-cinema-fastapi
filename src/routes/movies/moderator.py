@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.movies import MovieModel, CertificationModel, GenreModel, StarModel, DirectorModel
-from schemas.movies import MovieDetailSchema, MovieCreateSchema, MovieUpdateSchema, GenreDetailSchema, GenreCreateSchema
+from schemas.movies import MovieDetailSchema, MovieCreateSchema, MovieUpdateSchema, GenreDetailSchema, GenreCreateSchema, OrderItemModel
 from database import get_db
 
 from config.dependencies import require_moderator
@@ -272,6 +272,20 @@ async def delete_movie(
         raise HTTPException(
             status_code=404,
             detail="Movie with the given ID was not found."
+        )
+
+    purchases_stmt = (
+        select(OrderItemModel.id)
+        .where(OrderItemModel.movie_id == movie_id)
+        .limit(1)
+    )
+    result = await db.execute(purchases_stmt)
+    has_purchases = result.scalar() is not None
+
+    if has_purchases:
+        raise HTTPException(
+            status_code=409,
+            detail="Movie cannot be deleted because it has been purchased by users",
         )
 
     await db.delete(movie)
