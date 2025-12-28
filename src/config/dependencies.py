@@ -1,13 +1,21 @@
 import os
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 
 from config.settings import BaseAppSettings, Settings, TestingSettings
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from notifications.emails import EmailSender
 from notifications.interfaces import EmailSenderInterface
 from security.interfaces import JWTAuthManagerInterface
 from security.token_manager import JWTAuthManager
 
+from database.models.accounts import UserModel
+from sqlalchemy.ext.asyncio import AsyncSession
+from database import get_db
+
+from exceptions.security import TokenExpiredError, InvalidTokenError
+
+http_bearer = HTTPBearer()
 
 def get_settings() -> BaseAppSettings:
     """
@@ -77,3 +85,51 @@ def get_jwt_auth_manager(settings: BaseAppSettings = Depends(get_settings)) -> J
         secret_key_refresh=settings.SECRET_KEY_REFRESH,
         algorithm=settings.JWT_SIGNING_ALGORITHM
     )
+
+
+async def get_current_user(
+        credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
+        db: AsyncSession = Depends(get_db),
+        jwt_manager: JWTAuthManagerInterface = Depends(get_jwt_auth_manager),
+) -> UserModel:
+    token = credentials.credentials
+
+    try:
+        payload = jwt_manager.decode_access_token(token)
+    except TokenExpiredError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Access token is expired",
+        )
+    except InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid access token",
+        )
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+        )
+
+    user = await db.get(UserModel, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
+    return user
+
+
+async def require_moderator(
+    user: UserModel = Depends(get_current_user),
+) -> UserModel:
+    if user.role != "moderator":
+        raise HTTPException(
+            status_code=403,
+            detail="Moderator privileges required",
+        )
+    return user
