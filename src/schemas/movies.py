@@ -32,6 +32,14 @@ class GenreDetailSchema(GenreBaseSchema):
     }
 
 
+class GenreCreateSchema(BaseModel):
+    name: str
+
+    model_config = {
+        "from_attributes": True,
+    }
+
+
 class StarSchema(BaseModel):
     id: int
     name: str
