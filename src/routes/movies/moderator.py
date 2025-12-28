@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.movies import MovieModel, CertificationModel, GenreModel, StarModel, DirectorModel
-from schemas.movies import MovieDetailSchema, MovieCreateSchema, MovieUpdateSchema
+from schemas.movies import MovieDetailSchema, MovieCreateSchema, MovieUpdateSchema, GenreDetailSchema, GenreCreateSchema
 from database import get_db
 
 
@@ -56,7 +56,7 @@ async def create_movie(
     :rtype: MovieDetailSchema
 
     :raises HTTPException:
-        - 409 if a movie with the same name and date already exists.
+        - 409 if a movie with the same name, year and time already exists.
         - 400 if input data is invalid (e.g., violating a constraint).
     """
     existing_stmt = select(MovieModel).where(
@@ -277,3 +277,204 @@ async def delete_movie(
     await db.commit()
 
     return {"detail": "Movie deleted successfully."}
+
+
+# CRUD functions for genres
+@router.post(
+    "/genres/",
+    response_model=GenreDetailSchema,
+    summary="Add a new genre",
+    description=(
+            "<h3>This endpoint allows moderators to add a new genre to the database.</h3>"
+    ),
+    responses={
+        201: {
+            "description": "Genre created successfully.",
+        },
+        400: {
+            "description": "Invalid input.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid input data."}
+                }
+            },
+        }
+    },
+    status_code=201
+)
+async def create_genre(
+        genre_data: GenreCreateSchema,
+        db: AsyncSession = Depends(get_db)
+) -> MovieDetailSchema:
+    """
+    Add a new genre to the database.
+
+    This endpoint allows the creation of a new genre.
+
+    :param genre_data: The data required to create a new genre.
+    :type genre_data: GenreCreateSchema
+    :param db: The SQLAlchemy async database session (provided via dependency injection).
+    :type db: AsyncSession
+
+    :return: The created genre.
+    :rtype: GenreDetailSchema
+
+    :raises HTTPException:
+        - 409 if a genre with the same name already exists.
+        - 400 if input data is invalid (e.g., violating a constraint).
+    """
+    existing_stmt = select(GenreModel).where((GenreModel.name == genre_data.name))
+    existing_result = await db.execute(existing_stmt)
+    existing_genre = existing_result.scalars().first()
+
+    if existing_genre:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"A genre with the name '{genre_data.name}' already exists."
+            )
+        )
+
+    try:
+        genre = GenreModel(name=genre_data.name)
+        db.add(genre)
+        await db.commit()
+        await db.refresh(genre)
+
+        return GenreDetailSchema.model_validate(genre)
+
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")
+
+
+@router.patch(
+    "/genres/{genre_id}/",
+    summary="Update a genre by ID",
+    description=(
+            "<h3>Update name of a specific genre by its unique ID.</h3>"
+            "<p>This endpoint updates the name of an existing genre. If the genre with "
+            "the given ID does not exist, a 404 error is returned.</p>"
+    ),
+    responses={
+        200: {
+            "description": "Genre updated successfully.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Movie updated successfully."}
+                }
+            },
+        },
+        404: {
+            "description": "Genre not found.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Genre with the given ID was not found."}
+                }
+            },
+        },
+    }
+)
+async def update_genre(
+        genre_id: int,
+        genre_data: MovieCreateSchema,
+        db: AsyncSession = Depends(get_db),
+):
+    """
+    Update a specific genre by its ID.
+
+    This function updates a genre identified by its unique ID.
+    If the genre does not exist, a 404 error is raised.
+
+    :param genre_id: The unique identifier of the genre to update.
+    :type genre_id: int
+    :param genre_data: The updated data for the genre.
+    :type genre_data: GenreCreateSchema
+    :param db: The SQLAlchemy database session (provided via dependency injection).
+    :type db: AsyncSession
+
+    :raises HTTPException: Raises a 404 error if the genre with the given ID is not found.
+
+    :return: A response indicating the successful update of the genre.
+    :rtype: None
+    """
+    stmt = select(GenreModel).where(GenreModel.id == genre_id)
+    result = await db.execute(stmt)
+    genre = result.scalars().first()
+
+    if not genre:
+        raise HTTPException(
+            status_code=404,
+            detail="Genre with the given ID was not found."
+        )
+
+    for field, value in genre_data.model_dump(exclude_unset=True).items():
+        setattr(genre, field, value)
+
+    try:
+        await db.commit()
+        await db.refresh(genre)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")
+
+    return {"detail": "Genre updated successfully."}
+
+
+@router.delete(
+    "/genres/{genre_id}/",
+    summary="Delete a genre by ID",
+    description=(
+            "<h3>Delete a specific genre from the database by its unique ID.</h3>"
+            "<p>If the genre exists, it will be deleted. If it does not exist, "
+            "a 404 error will be returned.</p>"
+    ),
+    responses={
+        204: {
+            "description": "Genre deleted successfully."
+        },
+        404: {
+            "description": "Genre not found.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Genre with the given ID was not found."}
+                }
+            },
+        },
+    },
+    status_code=204
+)
+async def delete_movie(
+        genre_id: int,
+        db: AsyncSession = Depends(get_db),
+):
+    """
+    Delete a specific movie by its ID.
+
+    This function deletes a movie identified by its unique ID.
+    If the movie does not exist, a 404 error is raised.
+
+    :param genre_id: The unique identifier of the genre to delete.
+    :type genre_id: int
+    :param db: The SQLAlchemy database session (provided via dependency injection).
+    :type db: AsyncSession
+
+    :raises HTTPException: Raises a 404 error if the genre with the given ID is not found.
+
+    :return: A response indicating the successful deletion of the genre.
+    :rtype: None
+    """
+    stmt = select(GenreModel).where(GenreModel.id == genre_id)
+    result = await db.execute(stmt)
+    genre = result.scalars().first()
+
+    if not genre:
+        raise HTTPException(
+            status_code=404,
+            detail="Genre with the given ID was not found."
+        )
+
+    await db.delete(genre)
+    await db.commit()
+
+    return {"detail": "Genre deleted successfully."}
