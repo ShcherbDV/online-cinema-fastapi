@@ -6,11 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config.dependencies import get_current_user
 from src.database.models import UserModel, MovieModel
 from src.database.models.ratings import MovieRatingModel
-from src.schemas.ratings import MovieRatingResponseSchema, MessageResponseSchema, MovieRatingCreateSchema
+from src.schemas.ratings import MessageResponseSchema, MovieRatingCreateSchema
 from database import get_db
 
 
-router = APIRouter(prefix="/movies", tags=["Movie ratings"])
+router = APIRouter()
 
 
 @router.post("/{movie_id}/rating",

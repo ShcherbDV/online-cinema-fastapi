@@ -10,7 +10,7 @@ from database import get_db
 from schemas.movies import MovieListResponseSchema, MovieCatalogParams, MovieListItemSchema
 from services.movie.catalog import build_movie_catalog_query
 
-router = APIRouter(prefix="/favorites", tags=["Favorites"])
+router = APIRouter()
 
 
 @router.post(
