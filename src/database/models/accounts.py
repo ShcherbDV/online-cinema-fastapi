@@ -20,6 +20,8 @@ from database.models.base import Base
 from security.passwords import hash_password, verify_password
 from security.utils import generate_secure_token
 
+from src.database.models import FavoriteMovieModel
+
 
 class UserGroupEnum(str, enum.Enum):
     USER = "user"
@@ -78,6 +80,10 @@ class UserModel(Base):
 
     comments: Mapped["MovieCommentModel"] = relationship(
         "MovieCommentModel", back_populates="user", cascade="all, delete-orphan"
+    )
+
+    favorite_movies: Mapped[List["FavoriteMovieModel"]] = relationship(
+        "FavoriteMovieModel", back_populates="user", cascade="all, delete-orphan"
     )
 
     profile: Mapped[Optional["UserProfileModel"]] = relationship(

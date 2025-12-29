@@ -170,6 +170,10 @@ class MovieModel(Base):
         "MovieCommentModel", back_populates="movie", cascade="all, delete-orphan"
     )
 
+    favorited_by: Mapped[list["FavoriteMovieModel"]] = relationship(
+        "FavoriteMovieModel", back_populates="movie", cascade="all, delete-orphan"
+    )
+
     __table_args__ = (
         UniqueConstraint("name", "year", "time", name="uniq_movie_year_time"),
     )
