@@ -18,6 +18,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.models.base import Base
 
+
 MovieGenresModel = Table(
     "movie_genres",
     Base.metadata,
@@ -163,6 +164,10 @@ class MovieModel(Base):
 
     ratings: Mapped[list["MovieRatingModel"]] = relationship(
         "MovieRatingModel", back_populates="movies", cascade="all, delete-orphan"
+    )
+
+    comments: Mapped["MovieCommentModel"] = relationship(
+        "MovieCommentModel", back_populates="movie", cascade="all, delete-orphan"
     )
 
     __table_args__ = (

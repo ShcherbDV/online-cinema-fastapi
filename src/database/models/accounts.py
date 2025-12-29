@@ -76,6 +76,10 @@ class UserModel(Base):
         "MovieRatingModel", back_populates="user", cascade="all, delete-orphan"
     )
 
+    comments: Mapped["MovieCommentModel"] = relationship(
+        "MovieCommentModel", back_populates="user", cascade="all, delete-orphan"
+    )
+
     profile: Mapped[Optional["UserProfileModel"]] = relationship(
         "UserProfileModel", back_populates="user", cascade="all, delete-orphan"
     )
