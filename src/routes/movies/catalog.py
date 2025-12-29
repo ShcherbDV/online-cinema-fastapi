@@ -11,8 +11,11 @@ from schemas.movies import (
     GenreBaseSchema,
     GenreListResponseSchema,
     GenreListItemSchema,
+    MovieCatalogParams,
 )
 from database import get_db
+
+from services.movie.catalog import build_movie_catalog_query
 
 router = APIRouter()
 
@@ -39,6 +42,7 @@ router = APIRouter()
 async def get_movie_list(
     page: int = Query(1, ge=1, description="Page number (1-based index)"),
     per_page: int = Query(10, ge=1, le=20, description="Number of items per page"),
+    params: MovieCatalogParams = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> MovieListResponseSchema:
     """
@@ -52,6 +56,8 @@ async def get_movie_list(
     :type page: int
     :param per_page: The number of items to display per page (must be between 1 and 20).
     :type per_page: int
+    :param params: Movie catalog query parameters.
+    :type params: MovieCatalogParams
     :param db: The async SQLAlchemy database session (provided via dependency injection).
     :type db: AsyncSession
 
@@ -69,10 +75,7 @@ async def get_movie_list(
     if not total_items:
         raise HTTPException(status_code=404, detail="No movies found.")
 
-    order_by = MovieModel.default_order_by()
-    stmt = select(MovieModel)
-    if order_by:
-        stmt = stmt.order_by(*order_by)
+    stmt = build_movie_catalog_query(params)
 
     stmt = stmt.offset(offset).limit(per_page)
 
