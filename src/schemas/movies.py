@@ -167,3 +167,17 @@ class MovieUpdateSchema(BaseModel):
     model_config = {
         "from_attributes": True,
     }
+
+
+class MovieCatalogParams(BaseModel):
+    search: Optional[str] = Field(None, description="Search by title, description, actor, director")
+    year_from: Optional[int] = None
+    year_to: Optional[int] = None
+    imdb_from: Optional[float] = None
+    imdb_to: Optional[float] = None
+
+    sort_by: Optional[str] = Field(
+        None,
+        description="price | year | imdb | popularity"
+    )
+    sort_order: str = Field("desc", description="asc | desc")
