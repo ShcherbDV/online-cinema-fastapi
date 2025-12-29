@@ -167,8 +167,9 @@ async def get_movie_by_id(
     )
     result_rating = await db.execute(stmt_rating)
     votes = result_rating.one()
+    movie.votes = votes
 
-    return MovieDetailSchema(**movie.__dict__, votes=votes)
+    return MovieDetailSchema.model_validate(movie)
 
 
 @router.get(
