@@ -24,6 +24,25 @@ async def add_to_favorites(
     db: AsyncSession = Depends(get_db),
     user: UserModel = Depends(get_current_user),
 ):
+    """
+    Add a movie to the favorite list of user.
+
+    This endpoint allows the adding of a movie to favorite list of user.
+
+    :param movie_id: The ID of a movie to add.
+    :type movie_id: int
+    :param db: The SQLAlchemy async database session (provided via dependency injection).
+    :type db: AsyncSession
+    :param user: The SQLAlchemy user model (provided via dependency injection).
+    :type user: UserModel
+
+    :return: A response indicating the successful adding movie to favorites.
+    :rtype: None
+
+    :raises HTTPException:
+        - 404 if a movie with the given ID is not found.
+        - 409 if input data revoke conflict (like movie is already in the favorite list).
+    """
     movie = await db.get(MovieModel, movie_id)
 
     if not movie:
@@ -63,6 +82,24 @@ async def delete_from_favorites(
     db: AsyncSession = Depends(get_db),
     user: UserModel = Depends(get_current_user),
 ):
+    """
+    Delete a specific movie by its ID from favorites.
+
+    This function deletes a movie identified by its unique ID from favorites.
+    If the movie does not found in favorites, a 404 error is raised.
+
+    :param movie_id: The unique identifier of the movie to delete.
+    :type movie_id: int
+    :param db: The SQLAlchemy database session (provided via dependency injection).
+    :type db: AsyncSession
+    :param user: The SQLAlchemy user model (provided via dependency injection).
+    :type user: UserModel
+
+    :raises HTTPException: Raises a 404 error if the movie with the given ID is not found.
+
+    :return: A response indicating the successful deletion of the movie.
+    :rtype: None
+    """
     stmt = select(FavoriteMovieModel).where(
         FavoriteMovieModel.user_id == user.id,
         FavoriteMovieModel.movie_id == movie_id,
@@ -90,6 +127,29 @@ async def get_favorites(
         db: AsyncSession = Depends(get_db),
         user: UserModel = Depends(get_current_user),
 ):
+    """
+    Fetch a paginated list of movies from the database (asynchronously).
+
+    This function retrieves a paginated list of movies, allowing the client to specify
+    the page number and the number of items per page. It calculates the total pages
+    and provides links to the previous and next pages when applicable.
+
+    :param page: The page number to retrieve (1-based index, must be >= 1).
+    :type page: int
+    :param per_page: The number of items to display per page (must be between 1 and 20).
+    :type per_page: int
+    :param params: Movie catalog query parameters.
+    :type params: MovieCatalogParams
+    :param db: The async SQLAlchemy database session (provided via dependency injection).
+    :type db: AsyncSession
+    :param user: The SQLAlchemy user model (provided via dependency injection).
+    :type user: UserModel
+
+    :return: A response containing the paginated list of movies and metadata.
+    :rtype: MovieListResponseSchema
+
+    :raises HTTPException: Raises a 404 error if no movies are found for the requested page.
+    """
 
     offset = (page - 1) * per_page
 
