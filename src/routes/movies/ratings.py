@@ -13,17 +13,18 @@ from database import get_db
 router = APIRouter()
 
 
-@router.post("/{movie_id}/rating",
-             response_model=MessageResponseSchema,
-             summary="Rate a movie by user",
-             description="Add or update rate to a movie by user",
-             status_code=status.HTTP_200_OK,
+@router.post(
+    "/{movie_id}/rating",
+    response_model=MessageResponseSchema,
+    summary="Rate a movie by user",
+    description="Add or update rate to a movie by user",
+    status_code=status.HTTP_200_OK,
 )
 async def rate_movie(
     movie_id: int,
     data: MovieRatingCreateSchema,
     db: AsyncSession = Depends(get_db),
-    user: UserModel = Depends(get_current_user)
+    user: UserModel = Depends(get_current_user),
 ):
     """
     Add a rate to the database to a movie by user.
@@ -48,7 +49,9 @@ async def rate_movie(
     movie = await db.get(MovieModel, movie_id)
 
     if not movie:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found"
+        )
 
     stmt = select(MovieRatingModel).where(
         MovieRatingModel.user_id == user.id,
@@ -71,16 +74,17 @@ async def rate_movie(
     return MessageResponseSchema(message="Rating saved!")
 
 
-@router.delete("/{movie_id}/rating",
-               response_model=MessageResponseSchema,
-               summary="Delete a rate for movie by user",
-               description="Delete a rate for movie by user",
-               status_code=status.HTTP_204_NO_CONTENT
+@router.delete(
+    "/{movie_id}/rating",
+    response_model=MessageResponseSchema,
+    summary="Delete a rate for movie by user",
+    description="Delete a rate for movie by user",
+    status_code=status.HTTP_204_NO_CONTENT,
 )
 async def remove_rating(
-        movie_id: int,
-        db: AsyncSession = Depends(get_db),
-        user: UserModel = Depends(get_current_user)
+    movie_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: UserModel = Depends(get_current_user),
 ):
     """
     Delete a rate for a specific movie by its ID.
@@ -108,7 +112,9 @@ async def remove_rating(
     rating_obj = await result.scalar_one_or_none()
 
     if not rating_obj:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found"
+        )
 
     await db.delete(rating_obj)
     await db.commit()

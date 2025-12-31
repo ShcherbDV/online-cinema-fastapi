@@ -44,10 +44,9 @@ class Settings(BaseAppSettings):
     JWT_SIGNING_ALGORITHM: str = os.getenv("JWT_SIGNING_ALGORITHM", "HS256")
 
     model_config = SettingsConfigDict(
-        env_file = ".env",
-        env_file_encoding = "utf-8",
-        extra = "ignore"
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
+
 
 class TestingSettings(BaseAppSettings):
     pass

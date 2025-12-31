@@ -1,6 +1,5 @@
 from decimal import Decimal
 from typing import Optional
-from uuid import UUID
 import uuid
 from sqlalchemy import (
     Table,

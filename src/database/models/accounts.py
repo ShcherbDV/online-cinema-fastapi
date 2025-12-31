@@ -221,9 +221,7 @@ class RefreshTokenModel(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc) + timedelta(days=5),
     )
-    user: Mapped[UserModel] = relationship(
-        "UserModel", back_populates="refresh_token"
-    )
+    user: Mapped[UserModel] = relationship("UserModel", back_populates="refresh_token")
 
     __table_args__ = (UniqueConstraint("user_id"),)
 

@@ -3,8 +3,21 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models.movies import MovieModel, CertificationModel, GenreModel, StarModel, DirectorModel
-from schemas.movies import MovieDetailSchema, MovieCreateSchema, MovieUpdateSchema, GenreDetailSchema, GenreCreateSchema, OrderItemModel
+from database.models.movies import (
+    MovieModel,
+    CertificationModel,
+    GenreModel,
+    StarModel,
+    DirectorModel,
+)
+from schemas.movies import (
+    MovieDetailSchema,
+    MovieCreateSchema,
+    MovieUpdateSchema,
+    GenreDetailSchema,
+    GenreCreateSchema,
+    OrderItemModel,
+)
 from database import get_db
 
 from config.dependencies import require_moderator
@@ -17,10 +30,10 @@ router = APIRouter(dependencies=[Depends(require_moderator)])
     response_model=MovieDetailSchema,
     summary="Add a new movie",
     description=(
-            "<h3>This endpoint allows clients to add a new movie to the database. "
-            "It accepts details such as name, year, genres, stars, directors, and "
-            "other attributes. The associated certificate, genres, stars, and directors "
-            "will be created or linked automatically.</h3>"
+        "<h3>This endpoint allows clients to add a new movie to the database. "
+        "It accepts details such as name, year, genres, stars, directors, and "
+        "other attributes. The associated certificate, genres, stars, and directors "
+        "will be created or linked automatically.</h3>"
     ),
     responses={
         201: {
@@ -29,17 +42,14 @@ router = APIRouter(dependencies=[Depends(require_moderator)])
         400: {
             "description": "Invalid input.",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Invalid input data."}
-                }
+                "application/json": {"example": {"detail": "Invalid input data."}}
             },
-        }
+        },
     },
-    status_code=201
+    status_code=201,
 )
 async def create_movie(
-        movie_data: MovieCreateSchema,
-        db: AsyncSession = Depends(get_db)
+    movie_data: MovieCreateSchema, db: AsyncSession = Depends(get_db)
 ) -> MovieDetailSchema:
     """
     Add a new movie to the database.
@@ -74,11 +84,13 @@ async def create_movie(
             detail=(
                 f"A movie with the name '{movie_data.name}', release year"
                 f"'{movie_data.year}', adn time '{movie_data.time}' already exists."
-            )
+            ),
         )
 
     try:
-        certificate_stmt = select(CertificationModel).where(CertificationModel.name == movie_data.certificate)
+        certificate_stmt = select(CertificationModel).where(
+            CertificationModel.name == movie_data.certificate
+        )
         certificate_result = await db.execute(certificate_stmt)
         certificate = certificate_result.scalars().first()
         if not certificate:
@@ -112,7 +124,9 @@ async def create_movie(
 
         directors = []
         for director_name in movie_data.directors:
-            director_stmt = select(DirectorModel).where(DirectorModel.name == director_name)
+            director_stmt = select(DirectorModel).where(
+                DirectorModel.name == director_name
+            )
             director_result = await db.execute(director_stmt)
             director = director_result.scalars().first()
 
@@ -152,9 +166,9 @@ async def create_movie(
     "/movies/{movie_id}/",
     summary="Update a movie by ID",
     description=(
-            "<h3>Update details of a specific movie by its unique ID.</h3>"
-            "<p>This endpoint updates the details of an existing movie. If the movie with "
-            "the given ID does not exist, a 404 error is returned.</p>"
+        "<h3>Update details of a specific movie by its unique ID.</h3>"
+        "<p>This endpoint updates the details of an existing movie. If the movie with "
+        "the given ID does not exist, a 404 error is returned.</p>"
     ),
     responses={
         200: {
@@ -173,12 +187,12 @@ async def create_movie(
                 }
             },
         },
-    }
+    },
 )
 async def update_movie(
-        movie_id: int,
-        movie_data: MovieUpdateSchema,
-        db: AsyncSession = Depends(get_db),
+    movie_id: int,
+    movie_data: MovieUpdateSchema,
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Update a specific movie by its ID.
@@ -204,8 +218,7 @@ async def update_movie(
 
     if not movie:
         raise HTTPException(
-            status_code=404,
-            detail="Movie with the given ID was not found."
+            status_code=404, detail="Movie with the given ID was not found."
         )
 
     for field, value in movie_data.model_dump(exclude_unset=True).items():
@@ -225,14 +238,12 @@ async def update_movie(
     "/movies/{movie_id}/",
     summary="Delete a movie by ID",
     description=(
-            "<h3>Delete a specific movie from the database by its unique ID.</h3>"
-            "<p>If the movie exists, it will be deleted. If it does not exist, "
-            "a 404 error will be returned.</p>"
+        "<h3>Delete a specific movie from the database by its unique ID.</h3>"
+        "<p>If the movie exists, it will be deleted. If it does not exist, "
+        "a 404 error will be returned.</p>"
     ),
     responses={
-        204: {
-            "description": "Movie deleted successfully."
-        },
+        204: {"description": "Movie deleted successfully."},
         404: {
             "description": "Movie not found.",
             "content": {
@@ -242,11 +253,11 @@ async def update_movie(
             },
         },
     },
-    status_code=204
+    status_code=204,
 )
 async def delete_movie(
-        movie_id: int,
-        db: AsyncSession = Depends(get_db),
+    movie_id: int,
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Delete a specific movie by its ID.
@@ -262,7 +273,6 @@ async def delete_movie(
     :raises HTTPException: Raises a 404 error if the movie with the given ID is not found.
 
     :return: A response indicating the successful deletion of the movie.
-    :rtype: None
     """
     stmt = select(MovieModel).where(MovieModel.id == movie_id)
     result = await db.execute(stmt)
@@ -270,14 +280,11 @@ async def delete_movie(
 
     if not movie:
         raise HTTPException(
-            status_code=404,
-            detail="Movie with the given ID was not found."
+            status_code=404, detail="Movie with the given ID was not found."
         )
 
     purchases_stmt = (
-        select(OrderItemModel.id)
-        .where(OrderItemModel.movie_id == movie_id)
-        .limit(1)
+        select(OrderItemModel.id).where(OrderItemModel.movie_id == movie_id).limit(1)
     )
     result = await db.execute(purchases_stmt)
     has_purchases = result.scalar() is not None
@@ -300,7 +307,7 @@ async def delete_movie(
     response_model=GenreDetailSchema,
     summary="Add a new genre",
     description=(
-            "<h3>This endpoint allows moderators to add a new genre to the database.</h3>"
+        "<h3>This endpoint allows moderators to add a new genre to the database.</h3>"
     ),
     responses={
         201: {
@@ -309,17 +316,14 @@ async def delete_movie(
         400: {
             "description": "Invalid input.",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Invalid input data."}
-                }
+                "application/json": {"example": {"detail": "Invalid input data."}}
             },
-        }
+        },
     },
-    status_code=201
+    status_code=201,
 )
 async def create_genre(
-        genre_data: GenreCreateSchema,
-        db: AsyncSession = Depends(get_db)
+    genre_data: GenreCreateSchema, db: AsyncSession = Depends(get_db)
 ) -> MovieDetailSchema:
     """
     Add a new genre to the database.
@@ -345,9 +349,7 @@ async def create_genre(
     if existing_genre:
         raise HTTPException(
             status_code=409,
-            detail=(
-                f"A genre with the name '{genre_data.name}' already exists."
-            )
+            detail=(f"A genre with the name '{genre_data.name}' already exists."),
         )
 
     try:
@@ -367,9 +369,9 @@ async def create_genre(
     "/genres/{genre_id}/",
     summary="Update a genre by ID",
     description=(
-            "<h3>Update name of a specific genre by its unique ID.</h3>"
-            "<p>This endpoint updates the name of an existing genre. If the genre with "
-            "the given ID does not exist, a 404 error is returned.</p>"
+        "<h3>Update name of a specific genre by its unique ID.</h3>"
+        "<p>This endpoint updates the name of an existing genre. If the genre with "
+        "the given ID does not exist, a 404 error is returned.</p>"
     ),
     responses={
         200: {
@@ -388,12 +390,12 @@ async def create_genre(
                 }
             },
         },
-    }
+    },
 )
 async def update_genre(
-        genre_id: int,
-        genre_data: MovieCreateSchema,
-        db: AsyncSession = Depends(get_db),
+    genre_id: int,
+    genre_data: MovieCreateSchema,
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Update a specific genre by its ID.
@@ -419,8 +421,7 @@ async def update_genre(
 
     if not genre:
         raise HTTPException(
-            status_code=404,
-            detail="Genre with the given ID was not found."
+            status_code=404, detail="Genre with the given ID was not found."
         )
 
     for field, value in genre_data.model_dump(exclude_unset=True).items():
@@ -440,14 +441,12 @@ async def update_genre(
     "/genres/{genre_id}/",
     summary="Delete a genre by ID",
     description=(
-            "<h3>Delete a specific genre from the database by its unique ID.</h3>"
-            "<p>If the genre exists, it will be deleted. If it does not exist, "
-            "a 404 error will be returned.</p>"
+        "<h3>Delete a specific genre from the database by its unique ID.</h3>"
+        "<p>If the genre exists, it will be deleted. If it does not exist, "
+        "a 404 error will be returned.</p>"
     ),
     responses={
-        204: {
-            "description": "Genre deleted successfully."
-        },
+        204: {"description": "Genre deleted successfully."},
         404: {
             "description": "Genre not found.",
             "content": {
@@ -457,11 +456,11 @@ async def update_genre(
             },
         },
     },
-    status_code=204
+    status_code=204,
 )
-async def delete_movie(
-        genre_id: int,
-        db: AsyncSession = Depends(get_db),
+async def delete_genre(
+    genre_id: int,
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Delete a specific movie by its ID.
@@ -485,8 +484,7 @@ async def delete_movie(
 
     if not genre:
         raise HTTPException(
-            status_code=404,
-            detail="Genre with the given ID was not found."
+            status_code=404, detail="Genre with the given ID was not found."
         )
 
     await db.delete(genre)

@@ -2,7 +2,10 @@ from typing import List, Optional
 from decimal import Decimal
 from pydantic import BaseModel, Field, field_validator
 
-from schemas.examples.movies import movie_list_response_schema_example, movie_item_schema_example
+from schemas.examples.movies import (
+    movie_list_response_schema_example,
+    movie_item_schema_example,
+)
 
 
 class GenreBaseSchema(BaseModel):
@@ -104,11 +107,7 @@ class MovieListItemSchema(BaseModel):
 
     model_config = {
         "from_attributes": True,
-        "json_schema_extra": {
-            "examples": [
-                movie_item_schema_example
-            ]
-        }
+        "json_schema_extra": {"examples": [movie_item_schema_example]},
     }
 
 
@@ -121,12 +120,9 @@ class MovieListResponseSchema(BaseModel):
 
     model_config = {
         "from_attributes": True,
-        "json_schema_extra": {
-            "examples": [
-                movie_list_response_schema_example
-            ]
-        }
+        "json_schema_extra": {"examples": [movie_list_response_schema_example]},
     }
+
 
 class MovieCreateSchema(BaseModel):
     name: str = Field(..., max_length=255)
@@ -170,14 +166,13 @@ class MovieUpdateSchema(BaseModel):
 
 
 class MovieCatalogParams(BaseModel):
-    search: Optional[str] = Field(None, description="Search by title, description, actor, director")
+    search: Optional[str] = Field(
+        None, description="Search by title, description, actor, director"
+    )
     year_from: Optional[int] = None
     year_to: Optional[int] = None
     imdb_from: Optional[float] = None
     imdb_to: Optional[float] = None
 
-    sort_by: Optional[str] = Field(
-        None,
-        description="price | year | imdb | popularity"
-    )
+    sort_by: Optional[str] = Field(None, description="price | year | imdb | popularity")
     sort_order: str = Field("desc", description="asc | desc")

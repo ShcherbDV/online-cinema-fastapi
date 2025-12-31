@@ -6,10 +6,10 @@ from src.database.models.movies import StarModel, DirectorModel
 
 
 def build_movie_catalog_query(
-        params,
-        *,
-        only_favorites: bool = False,
-        user_id: int | None = None,
+    params,
+    *,
+    only_favorites: bool = False,
+    user_id: int | None = None,
 ):
     stmt = select(MovieModel).options(
         joinedload(MovieModel.genres),
@@ -18,7 +18,9 @@ def build_movie_catalog_query(
     )
 
     if only_favorites:
-        stmt = stmt.join(FavoriteMovieModel).where(FavoriteMovieModel.user_id == user_id)
+        stmt = stmt.join(FavoriteMovieModel).where(
+            FavoriteMovieModel.user_id == user_id
+        )
 
     if params.search:
         search = f"%{params.search.lower()}%"

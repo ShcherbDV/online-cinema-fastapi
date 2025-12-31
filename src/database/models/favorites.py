@@ -9,11 +9,19 @@ class FavoriteMovieModel(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    movie_id: Mapped[int] = mapped_column(
+        ForeignKey("movies.id", ondelete="CASCADE"), nullable=False
+    )
 
-    movie: Mapped["MovieModel"] = relationship("MovieModel", back_populates="favorited_by")
-    user: Mapped["UserModel"] = relationship("UserModel", back_populates="favorite_movies")
+    movie: Mapped["MovieModel"] = relationship(
+        "MovieModel", back_populates="favorited_by"
+    )
+    user: Mapped["UserModel"] = relationship(
+        "UserModel", back_populates="favorite_movies"
+    )
 
     __table_args__ = (
         UniqueConstraint("user_id", "movie_id", name="uq_user_movie_favorite"),

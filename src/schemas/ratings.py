@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class MovieRatingCreateSchema(BaseModel):
     rating: int = Field(..., ge=0, le=10)
 

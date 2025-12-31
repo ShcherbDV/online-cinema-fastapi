@@ -7,7 +7,11 @@ from database.models import UserModel, MovieModel, FavoriteMovieModel
 from config.dependencies import get_current_user
 from database import get_db
 
-from schemas.movies import MovieListResponseSchema, MovieCatalogParams, MovieListItemSchema
+from schemas.movies import (
+    MovieListResponseSchema,
+    MovieCatalogParams,
+    MovieListItemSchema,
+)
 from services.movie.catalog import build_movie_catalog_query
 
 router = APIRouter()
@@ -107,25 +111,28 @@ async def delete_from_favorites(
     favorite = (await db.execute(stmt)).scalar_one_or_none()
 
     if not favorite:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not in favorites")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Movie not in favorites"
+        )
 
     await db.delete(favorite)
     await db.commit()
     return {"detail": "Movie deleted from favorites"}
 
 
-@router.get("/favorites",
-            summary="List of favorites movies user",
-            description="List of favorites movies user",
-            response_model=MovieListResponseSchema,
-            status_code=status.HTTP_200_OK,
+@router.get(
+    "/favorites",
+    summary="List of favorites movies user",
+    description="List of favorites movies user",
+    response_model=MovieListResponseSchema,
+    status_code=status.HTTP_200_OK,
 )
 async def get_favorites(
-        page: int = Query(1, ge=1, description="Page number (1-based index)"),
-        per_page: int = Query(10, ge=1, le=20, description="Number of items per page"),
-        params: MovieCatalogParams = Depends(),
-        db: AsyncSession = Depends(get_db),
-        user: UserModel = Depends(get_current_user),
+    page: int = Query(1, ge=1, description="Page number (1-based index)"),
+    per_page: int = Query(10, ge=1, le=20, description="Number of items per page"),
+    params: MovieCatalogParams = Depends(),
+    db: AsyncSession = Depends(get_db),
+    user: UserModel = Depends(get_current_user),
 ):
     """
     Fetch a paginated list of movies from the database (asynchronously).
@@ -177,7 +184,9 @@ async def get_favorites(
     response = MovieListResponseSchema(
         movies=movie_list,
         prev_page=(
-            f"/cinema/favorites/?page={page - 1}&per_page={per_page}" if page > 1 else None
+            f"/cinema/favorites/?page={page - 1}&per_page={per_page}"
+            if page > 1
+            else None
         ),
         next_page=(
             f"/cinema/favorites/?page={page + 1}&per_page={per_page}"

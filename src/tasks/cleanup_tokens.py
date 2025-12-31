@@ -2,7 +2,11 @@ from datetime import datetime, timezone
 
 from celery import shared_task
 
-from database.models.accounts import ActivationTokenModel, PasswordResetTokenModel, RefreshTokenModel
+from database.models.accounts import (
+    ActivationTokenModel,
+    PasswordResetTokenModel,
+    RefreshTokenModel,
+)
 from database.session_sync import SessionLocal
 
 
@@ -14,7 +18,9 @@ def cleanup_expired_tokens():
 
         db.execute(ActivationTokenModel).where(ActivationTokenModel.expires_at < now)
 
-        db.execute(PasswordResetTokenModel).where(PasswordResetTokenModel.expires_at < now)
+        db.execute(PasswordResetTokenModel).where(
+            PasswordResetTokenModel.expires_at < now
+        )
 
         db.execute(RefreshTokenModel).where(RefreshTokenModel.expires_at < now)
 

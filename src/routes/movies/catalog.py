@@ -8,7 +8,6 @@ from schemas.movies import (
     MovieListResponseSchema,
     MovieListItemSchema,
     MovieDetailSchema,
-    GenreBaseSchema,
     GenreListResponseSchema,
     GenreListItemSchema,
     MovieCatalogParams,
