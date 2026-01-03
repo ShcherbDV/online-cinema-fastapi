@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.post(
-    "/movies/{movie_id}/comments",
+    "/movies/{movie_id}/comments/",
     response_model=CommentSchema,
     summary="Write a comment for movie by user",
     description="Add a comment for a movie by user",
@@ -56,7 +56,7 @@ async def create_comment(
 
 
 @router.get(
-    "/movies/{movie_id}/comments",
+    "/movies/{movie_id}/comments/",
     response_model=list[CommentSchema],
     summary="Get a paginated list of comments for movie",
     description="<h3>Get a paginated list of comments for movie</h3>",
@@ -98,7 +98,7 @@ async def get_comments(
 
 
 @router.patch(
-    "/comments/{comment_id}",
+    "/comments/{comment_id}/",
     summary="Update existing comment for movie",
     description="<h3>Update existing comment for movie</h3>",
     status_code=status.HTTP_200_OK,
@@ -149,7 +149,7 @@ async def update_comment(
 
 
 @router.delete(
-    "/comments/{comment_id}",
+    "/comments/{comment_id}/",
     summary="Delete existing comment for movie",
     description="<h3>Delete existing comment for movie</h3>",
     status_code=status.HTTP_204_NO_CONTENT,
