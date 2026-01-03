@@ -2,7 +2,7 @@ import os
 
 from fastapi import Depends, HTTPException, status
 
-from config.settings import BaseAppSettings, Settings, TestingSettings
+from config.settings import BaseAppSettings, Settings, TestingSettings, get_settings
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from notifications.emails import EmailSender
 from notifications.interfaces import EmailSenderInterface
@@ -16,23 +16,6 @@ from database import get_db
 from exceptions.security import TokenExpiredError, InvalidTokenError
 
 http_bearer = HTTPBearer()
-
-
-def get_settings() -> BaseAppSettings:
-    """
-    Retrieve the application settings based on the current environment.
-
-    This function reads the 'ENVIRONMENT' environment variable (defaulting to 'developing' if not set)
-    and returns a corresponding settings instance. If the environment is 'testing', it returns an instance
-    of TestingSettings; otherwise, it returns an instance of Settings.
-
-    Returns:
-        BaseAppSettings: The settings instance appropriate for the current environment.
-    """
-    environment = os.getenv("ENVIRONMENT", "developing")
-    if environment == "testing":
-        return TestingSettings()
-    return Settings()
 
 
 def get_accounts_email_notificator(

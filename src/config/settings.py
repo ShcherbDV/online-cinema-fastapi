@@ -4,12 +4,6 @@ from pathlib import Path
 from celery.schedules import crontab
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-CELERY_BEAT_SCHEDULE = {
-    "cleanup-expired-tokens-every-24-hours": {
-        "task": "src.tasks.cleanup_tokens.cleanup_expired_tokens",
-        "schedule": crontab(hour="*/24"),
-    }
-}
 
 
 class BaseAppSettings(BaseSettings):
@@ -31,6 +25,16 @@ class BaseAppSettings(BaseSettings):
     EMAIL_USE_TLS: bool = os.getenv("EMAIL_USE_TLS", "False").lower() == "true"
     MAILHOG_API_PORT: int = os.getenv("MAILHOG_API_PORT", 8025)
 
+    CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
+    CELERY_RESULT_BACKEND: str = ("CELERY_RESULT_BACKEND", "redis://redis:6379/1")
+
+    CELERY_BEAT_SCHEDULE: dict = {
+        "cleanup-expired-tokens-every-24-hours": {
+            "task": "tasks.cleanup_tokens.cleanup_expired_tokens",
+            "schedule": crontab(hour="*/24"),
+        }
+    }
+
 
 class Settings(BaseAppSettings):
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "admin")
@@ -50,3 +54,20 @@ class Settings(BaseAppSettings):
 
 class TestingSettings(BaseAppSettings):
     pass
+
+
+def get_settings() -> BaseAppSettings:
+    """
+    Retrieve the application settings based on the current environment.
+
+    This function reads the 'ENVIRONMENT' environment variable (defaulting to 'developing' if not set)
+    and returns a corresponding settings instance. If the environment is 'testing', it returns an instance
+    of TestingSettings; otherwise, it returns an instance of Settings.
+
+    Returns:
+        BaseAppSettings: The settings instance appropriate for the current environment.
+    """
+    environment = os.getenv("ENVIRONMENT", "developing")
+    if environment == "testing":
+        return TestingSettings()
+    return Settings()
