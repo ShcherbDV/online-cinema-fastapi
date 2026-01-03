@@ -119,7 +119,7 @@ class CertificationModel(Base):
     name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
 
     movies: Mapped[list["MovieModel"]] = relationship(
-        "MovieModel", back_populates="certificate"
+        "MovieModel", back_populates="certificate", cascade="all, delete-orphan"
     )
 
     def __repr__(self):
@@ -143,7 +143,7 @@ class MovieModel(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     certificate_id: Mapped[int] = mapped_column(
-        ForeignKey("certifications.id"), nullable=False
+        ForeignKey("certifications.id", ondelete="CASCADE"), nullable=False
     )
     certificate: Mapped["CertificationModel"] = relationship(
         "CertificationModel", back_populates="movies"
