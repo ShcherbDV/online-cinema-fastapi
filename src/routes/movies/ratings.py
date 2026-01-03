@@ -3,10 +3,11 @@ from fastapi.params import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.config.dependencies import get_current_user
-from src.database.models import UserModel, MovieModel
-from src.database.models.ratings import MovieRatingModel
-from src.schemas.ratings import MessageResponseSchema, MovieRatingCreateSchema
+from config.dependencies import get_current_user
+from database.models.accounts import UserModel
+from database.models.movies import MovieModel
+from database.models.ratings import MovieRatingModel
+from schemas.ratings import MessageResponseSchema, MovieRatingCreateSchema
 from database import get_db
 
 
@@ -76,7 +77,6 @@ async def rate_movie(
 
 @router.delete(
     "/{movie_id}/rating",
-    response_model=MessageResponseSchema,
     summary="Delete a rate for movie by user",
     description="Delete a rate for movie by user",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -119,4 +119,4 @@ async def remove_rating(
     await db.delete(rating_obj)
     await db.commit()
 
-    return MessageResponseSchema(message="Rating deleted!")
+    return {"detail": "Rating deleted!"}

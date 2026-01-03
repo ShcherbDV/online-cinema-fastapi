@@ -20,7 +20,7 @@ from database.models.base import Base
 from security.passwords import hash_password, verify_password
 from security.utils import generate_secure_token
 
-from src.database.models import FavoriteMovieModel
+from database.models.favorites import FavoriteMovieModel
 
 
 class UserGroupEnum(str, enum.Enum):

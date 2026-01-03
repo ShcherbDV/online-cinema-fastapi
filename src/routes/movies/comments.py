@@ -4,7 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.dependencies import get_current_user
-from database.models import UserModel, MovieCommentModel
+from database.models.accounts import UserModel
+from database.models.comments import MovieCommentModel
 from schemas.comments import CommentSchema, CommentCreateSchema, CommentUpdateSchema
 from database import get_db
 

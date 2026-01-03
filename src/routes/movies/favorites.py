@@ -3,7 +3,9 @@ from fastapi.params import Depends, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import UserModel, MovieModel, FavoriteMovieModel
+from database.models.accounts import UserModel
+from database.models.movies import MovieModel
+from database.models.favorites import FavoriteMovieModel
 from config.dependencies import get_current_user
 from database import get_db
 

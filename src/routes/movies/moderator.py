@@ -10,13 +10,13 @@ from database.models.movies import (
     StarModel,
     DirectorModel,
 )
+from database.models.orders import OrderItemModel
 from schemas.movies import (
     MovieDetailSchema,
     MovieCreateSchema,
     MovieUpdateSchema,
     GenreDetailSchema,
     GenreCreateSchema,
-    OrderItemModel,
 )
 from database import get_db
 

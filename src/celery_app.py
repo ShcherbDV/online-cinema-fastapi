@@ -1,6 +1,6 @@
 from celery import Celery
 
-from config.dependencies import get_settings
+from config.settings import get_settings
 
 settings = get_settings()
 
@@ -12,6 +12,6 @@ celery_app = Celery(
 
 celery_app.conf.update(timezone="UTC", enable_utc=True)
 
-celery_app.autodiscover_tasks(["src.tasks"])
+celery_app.autodiscover_tasks(["tasks"])
 
 celery_app.conf.beat_schedule = settings.CELERY_BEAT_SCHEDULE

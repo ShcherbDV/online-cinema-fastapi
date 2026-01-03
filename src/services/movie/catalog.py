@@ -1,8 +1,8 @@
 from sqlalchemy import select, or_, asc, desc
 from sqlalchemy.orm import joinedload
 
-from src.database.models import MovieModel, FavoriteMovieModel
-from src.database.models.movies import StarModel, DirectorModel
+from database.models.favorites import FavoriteMovieModel
+from database.models.movies import StarModel, DirectorModel, MovieModel
 
 
 def build_movie_catalog_query(

@@ -3,7 +3,8 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from database.models.movies import MovieModel, GenreModel, MovieRatingModel
+from database.models.movies import MovieModel, GenreModel
+from database.models.ratings import MovieRatingModel
 from schemas.movies import (
     MovieListResponseSchema,
     MovieListItemSchema,
