@@ -162,7 +162,7 @@ class MovieModel(Base):
     )
 
     ratings: Mapped[list["MovieRatingModel"]] = relationship(
-        "MovieRatingModel", back_populates="movies", cascade="all, delete-orphan"
+        "MovieRatingModel", back_populates="movie", cascade="all, delete-orphan"
     )
 
     comments: Mapped["MovieCommentModel"] = relationship(
@@ -171,6 +171,10 @@ class MovieModel(Base):
 
     favorited_by: Mapped[list["FavoriteMovieModel"]] = relationship(
         "FavoriteMovieModel", back_populates="movie", cascade="all, delete-orphan"
+    )
+
+    order_items: Mapped[list["OrderItemModel"]] = relationship(
+        "OrderItemModel", back_populates="movie", cascade="all, delete-orphan"
     )
 
     __table_args__ = (

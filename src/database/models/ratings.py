@@ -16,7 +16,7 @@ class MovieRatingModel(Base):
     )
 
     movie: Mapped["MovieModel"] = relationship(
-        "MovieModel", back_populates="movie_ratings"
+        "MovieModel", back_populates="ratings"
     )
     user: Mapped["UserModel"] = relationship("UserModel", back_populates="ratings")
 

@@ -74,12 +74,16 @@ class UserModel(Base):
         "UserGroupModel", back_populates="users"
     )
 
-    movie_ratings: Mapped[list["MovieRatingModel"]] = relationship(
+    ratings: Mapped[list["MovieRatingModel"]] = relationship(
         "MovieRatingModel", back_populates="user", cascade="all, delete-orphan"
     )
 
     comments: Mapped["MovieCommentModel"] = relationship(
         "MovieCommentModel", back_populates="user", cascade="all, delete-orphan"
+    )
+
+    order_items: Mapped[list["OrderItemModel"]] = relationship(
+        "OrderItemModel", back_populates="user", cascade="all, delete-orphan"
     )
 
     favorite_movies: Mapped[List["FavoriteMovieModel"]] = relationship(
