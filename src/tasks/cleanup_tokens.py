@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from celery import shared_task
+from celery_app import celery_app
 
 from database.models.accounts import (
     ActivationTokenModel,
@@ -8,21 +8,23 @@ from database.models.accounts import (
     RefreshTokenModel,
 )
 from database.session_sync import SessionLocal
+from sqlalchemy import delete
 
 
-@shared_task(name="src.tasks.cleanup_tokens.cleanup_expired_tokens")
+@celery_app.task(name="tasks.cleanup_tokens.cleanup_expired_tokens")
 def cleanup_expired_tokens():
-    db = SessionLocal
+    db = SessionLocal()
+
     try:
         now = datetime.now(timezone.utc)
 
-        db.execute(ActivationTokenModel).where(ActivationTokenModel.expires_at < now)
+        db.execute(delete(ActivationTokenModel)).where(ActivationTokenModel.expires_at < now)
 
-        db.execute(PasswordResetTokenModel).where(
+        db.execute(delete(PasswordResetTokenModel)).where(
             PasswordResetTokenModel.expires_at < now
         )
 
-        db.execute(RefreshTokenModel).where(RefreshTokenModel.expires_at < now)
+        db.execute(delete(RefreshTokenModel)).where(RefreshTokenModel.expires_at < now)
 
         db.commit()
     except Exception:
