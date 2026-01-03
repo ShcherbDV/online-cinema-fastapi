@@ -65,9 +65,16 @@ services:
   celery_worker:
     build: .
     container_name: celery_cinema
-    command: celery -A celery_app worker --loglevel=info
+    command: >
+      celery
+      -A celery_app.celery_app
+      worker
+      -l debug
+      --pool=solo
     env_file:
       - .env
+    environment:
+      - PYTHONPATH=/usr/src/fastapi
     depends_on:
       - web
       - redis
