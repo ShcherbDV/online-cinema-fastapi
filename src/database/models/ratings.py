@@ -22,5 +22,4 @@ class MovieRatingModel(Base):
 
     __table_args__ = (
         UniqueConstraint("user_id", "movie_id", name="uq_user_movie_rating"),
-        CheckConstraint("rating >= 0 AND rating <= 10", name="ck_rating_range"),
     )
