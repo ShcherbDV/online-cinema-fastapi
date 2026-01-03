@@ -27,14 +27,6 @@ class GenreListResponseSchema(BaseModel):
     genres: List[GenreListItemSchema]
 
 
-class GenreDetailSchema(GenreBaseSchema):
-    movies: List["MovieListItemSchema"]
-
-    model_config = {
-        "from_attributes": True,
-    }
-
-
 class GenreCreateSchema(BaseModel):
     name: str
 
