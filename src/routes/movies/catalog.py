@@ -80,7 +80,7 @@ async def get_movie_list(
     stmt = stmt.offset(offset).limit(per_page)
 
     result_movies = await db.execute(stmt)
-    movies = result_movies.scalars().all()
+    movies = result_movies.unique().scalars().all()
 
     if not movies:
         raise HTTPException(status_code=404, detail="No movies found.")
