@@ -15,14 +15,14 @@ from schemas.movies import (
     MovieDetailSchema,
     MovieCreateSchema,
     MovieUpdateSchema,
-    GenreDetailSchema,
+    GenreBaseSchema,
     GenreCreateSchema,
 )
 from database import get_db
 
 from config.dependencies import require_moderator
 
-router = APIRouter(dependencies=[Depends(require_moderator)])
+router = APIRouter()
 
 
 @router.post(
@@ -304,7 +304,7 @@ async def delete_movie(
 # CRUD functions for genres
 @router.post(
     "/genres/",
-    response_model=GenreDetailSchema,
+    response_model=GenreBaseSchema,
     summary="Add a new genre",
     description=(
         "<h3>This endpoint allows moderators to add a new genre to the database.</h3>"
@@ -358,7 +358,7 @@ async def create_genre(
         await db.commit()
         await db.refresh(genre)
 
-        return GenreDetailSchema.model_validate(genre)
+        return GenreBaseSchema.model_validate(genre)
 
     except IntegrityError:
         await db.rollback()

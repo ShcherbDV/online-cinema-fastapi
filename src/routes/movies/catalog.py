@@ -169,7 +169,7 @@ async def get_movie_by_id(
         MovieRatingModel.movie_id == movie_id
     )
     result_rating = await db.execute(stmt_rating)
-    votes = result_rating.one()
+    votes = result_rating.scalar_one()
     movie.votes = votes
 
     return MovieDetailSchema.model_validate(movie)
@@ -208,31 +208,27 @@ async def get_genre_list(
 
     :raises HTTPException: Raises a 404 error if no genres are found for the requested page.
     """
+    count_stmt = select(func.count(MovieModel.id))
+    result_count = await db.execute(count_stmt)
+    movies_count = result_count.scalar() or 0
 
     stmt = (
-        select(
-            GenreModel.id,
-            GenreModel.name,
-            func.count(MovieModel.id).label("movies_count"),
-        )
-        .outerjoin(MovieModel.genres)
-        .group_by(GenreModel.id)
-        .order_by(GenreModel.name)
+        select(GenreModel).order_by(GenreModel.name)
     )
 
     result = await db.execute(stmt)
-    rows = result.all()
+    genres = result.scalars().all()
 
-    if not rows:
+    if not genres:
         raise HTTPException(status_code=404, detail="No genres found.")
 
-    genres = [
+    response = [
         GenreListItemSchema(
-            id=row.id,
-            name=row.name,
-            movies_count=row.movies_count,
+            id=genre.id,
+            name=genre.name,
+            movies_count=movies_count
         )
-        for row in rows
+        for genre in genres
     ]
 
-    return GenreListResponseSchema(genres=genres)
+    return GenreListResponseSchema(genres=response)
