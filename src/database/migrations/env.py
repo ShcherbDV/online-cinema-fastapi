@@ -2,7 +2,12 @@ from logging.config import fileConfig
 
 from alembic import context
 
-from database.models import *
+from database.models.movies import *
+from database.models.accounts import *
+from database.models.ratings import *
+from database.models.favorites import *
+from database.models.comments import *
+from database.models.orders import *
 from database.models.base import Base
 from database.session_postrgresql import sync_postgresql_engine
 
