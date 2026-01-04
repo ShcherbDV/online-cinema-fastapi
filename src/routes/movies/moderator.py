@@ -22,7 +22,7 @@ from database import get_db
 
 from config.dependencies import require_moderator
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_moderator)])
 
 
 @router.post(
